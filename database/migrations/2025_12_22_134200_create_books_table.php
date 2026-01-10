@@ -24,7 +24,6 @@ return new class extends Migration
             $table->string('edisi')->nullable();
             $table->string('sinopsis')->nullable();
             $table->integer('jumlah_halaman')->nullable();
-            $table->string('bahasa')->nullable();
             $table->string('ukuran')->nullable();
             $table->string('isbn')->nullable()->unique();
             $table->string('issn')->nullable()->unique();

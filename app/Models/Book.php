@@ -23,7 +23,6 @@ class Book extends Model
         'edisi',
         'sinopsis',
         'jumlah_halaman',
-        'bahasa',
         'ukuran',
         'isbn',
         'issn',
