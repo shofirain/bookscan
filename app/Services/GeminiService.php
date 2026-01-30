@@ -15,73 +15,84 @@ class GeminiService
         $this->apiKey = config('services.gemini.api_key');
     }
 
-    public function extractMetadata(string $frontText, string $backText): array
+    public function extractMetadata(string $ocrText): array
     {
         try {
-            $prompt = $this->buildPrompt($frontText, $backText);
+            Log::info('GeminiService: Starting extraction for OCR test', ['text_length' => strlen($ocrText)]);
+            
+            $prompt = $this->buildPrompt($ocrText);
 
-            $response = Http::post($this->apiUrl . '?key=' . $this->apiKey, [
-                'contents' => [
-                    [
-                        'parts' => [
-                            ['text' => $prompt]
+            $response = Http::timeout(30)
+                ->post($this->apiUrl, [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt]
+                            ]
                         ]
                     ]
-                ],
-                'generationConfig' => [
-                    'temperature' => 0.2,
-                    'topK' => 40,
-                    'topP' => 0.95,
-                ]
-            ]);
+                ]);
 
             if ($response->successful()) {
                 $result = $response->json();
-                $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                Log::info('GeminiService: API response received', ['response' => $result]);
 
-                return $this->parseMetadata($text);
+                $extractedText = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+                return [
+                    'success' => true,
+                    'raw_response' => $extractedText,
+                    'json_data' => json_decode($this->cleanJsonResponse($extractedText), true)
+                ];
+
+            } else {
+                Log::error('GeminiService: API request failed', [
+                    'status' => $response->status(), 
+                    'body' => $response->body()
+                ]);
+
+                return [
+                    'success' => false, 
+                    'error' => 'API request failed' . $response->status(),
+                    'raw_response' => $response->body(),
+                    'json_data' => null
+                ];
             }
-
-            return ['success' => false, 'error' => $response->body()];
         } catch (\Exception $e) {
-            Log::error('Gemini AI Error: ' . $e->getMessage());
-            return ['success' => false, 'error' => $e->getMessage()];
+            Log::error('GeminiService: Exception occurred', [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [
+                'success' => false, 
+                'error' => 'Exception: ' . $e->getMessage(),
+                'raw_response' => null,
+                'json_data' => null,
+                'parsed_data' => null
+            ];
         }
     }
 
-    protected function buildPrompt(string $frontText, string $backText): string
+    protected function buildPrompt(string $ocrText): string
     {
-        return <<<PROMPT
-Ekstrak metadata buku dari teks OCR berikut. Berikan hasilnya dalam format JSON yang valid.
-
-Teks dari Cover Depan:
-{$frontText}
-
-Teks dari Cover Belakang:
-{$backText}
-
-Ekstrak informasi berikut (gunakan null jika tidak ditemukan):
-- title: judul buku
-- author: nama pengarang
-- publisher: nama penerbit
-- isbn: nomor ISBN (10 atau 13 digit)
-- publication_year: tahun terbit (format: YYYY)
-- description: deskripsi/sinopsis buku
-- category: kategori/genre buku
-- price: harga buku (jika ada)
-
-Berikan hanya JSON tanpa penjelasan tambahan. Format:
-{
-    "title": "...",
-    "author": "...",
-    "publisher": "...",
-    "isbn": "...",
-    "publication_year": "...",
-    "description": "...",
-    "category": "...",
-    "price": "..."
-}
-PROMPT;
+        return "{$ocrText}
+        Ini adalah hasil OCR dari buku.
+        Ekstrak metadata buku dari teks OCR berikut. Berikan hasilnya dalam format JSON berikut:
+        
+        {
+        \"judul\": \"\",
+        \"pengarang\": \"\",
+        \"penerbit\": \"\",
+        \"tahun_terbit\": \"\",
+        \"edisi\": \"\",
+        \"isbn\": \"\",
+        \"issn\": \"\",
+        \"jumlah_halaman\": 0,
+        \"sinopsis\": \"\"
+        }
+        Jika data tidak ditemukan, kosongkan field.
+        Berikan HANYA JSON tanpa penjelasan tambahan.";
     }
 
     protected function parseMetadata(string $text): array

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Book extends Model
 {
@@ -54,5 +55,20 @@ class Book extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getImageUrlAttribute(): array
+    {
+        $images = [];
+
+        if ($this->cover_depan) {
+            $images[] = Storage::url($this->cover_depan);
+        }
+
+        if ($this->cover_belakang) {
+            $images[] = Storage::url($this->cover_belakang);
+        }
+
+        return $images;
     }
 }
