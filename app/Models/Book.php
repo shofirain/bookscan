@@ -57,18 +57,5 @@ class Book extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getImageUrlAttribute(): array
-    {
-        $images = [];
-
-        if ($this->cover_depan) {
-            $images[] = Storage::url($this->cover_depan);
-        }
-
-        if ($this->cover_belakang) {
-            $images[] = Storage::url($this->cover_belakang);
-        }
-
-        return $images;
-    }
+    
 }
