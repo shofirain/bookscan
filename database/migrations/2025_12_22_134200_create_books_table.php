@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('penerbit')->nullable();
             $table->year('tahun_terbit')->nullable();
             $table->string('edisi')->nullable();
-            $table->string('sinopsis')->nullable();
+            $table->text('sinopsis')->nullable();
             $table->integer('jumlah_halaman')->nullable();
             $table->string('ukuran')->nullable();
             $table->string('isbn')->nullable()->unique();

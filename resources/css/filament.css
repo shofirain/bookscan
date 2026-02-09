@@ -1,0 +1,9 @@
+/* TEST KERAS - kalau ini tidak jalan, berarti CSS belum kebaca */
+body {
+    background-color: yellow !important;
+}
+
+/* Sidebar */
+.fi-layout-sidebar {
+    background-color: #2563eb !important; /* biru */
+}
