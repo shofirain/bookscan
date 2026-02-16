@@ -59,7 +59,7 @@ class CreateBook extends CreateRecord
                                 Forms\Components\FileUpload::make('cover_depan')
                                     ->label('Cover Depan')
                                     ->image()
-                                    ->directory('book-covers')
+                                    ->directory('book-covers/front')
                                     ->required()
                                     ->maxSize(10240) // 10MB
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])
@@ -80,7 +80,7 @@ class CreateBook extends CreateRecord
                                 Forms\Components\FileUpload::make('cover_belakang')
                                     ->label('Cover Belakang')
                                     ->image()
-                                    ->directory('book-covers')
+                                    ->directory('book-covers/back')
                                     ->maxSize(10240)
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])
                                     ->live()
@@ -91,6 +91,22 @@ class CreateBook extends CreateRecord
                                             ->info()
                                             ->send();
                                     }),
+                                
+                                    // Forms\Components\FileUpload::make('copyright')
+                                    // ->label('Copyright')
+                                    // ->image()
+                                    // ->directory('book-covers/copyright')
+                                    // ->maxSize(10240)
+                                    // ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])
+                                    // ->live()
+                                    // ->afterStateUpdated(function ($state, Set $set) {
+                                    //     Notification::make()
+                                    //         ->title('Copyright diupload')
+                                    //         ->body('Klik "Scan OCR" untuk memproses ketiga gambar')
+                                    //         ->info()
+                                    //         ->send();
+                                    // }),
+                                    
                             ]),
 
                         Forms\Components\Actions::make([

@@ -29,6 +29,7 @@ class Book extends Model
         'issn',
         'cover_depan',
         'cover_belakang',
+        'copyright_path',
         'status',
     ];
 

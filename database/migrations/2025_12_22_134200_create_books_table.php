@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('issn')->nullable()->unique();
             $table->string('cover_depan')->nullable();
             $table->string('cover_belakang')->nullable();
+            $table->string('copyright_path')->nullable();
             $table->string('status')->default('tersedia');
             $table->timestamps();
             $table->softDeletes();
