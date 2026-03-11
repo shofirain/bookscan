@@ -72,7 +72,7 @@ class CreateBook extends CreateRecord
                                         
                                         Notification::make()
                                             ->title('Cover depan diupload')
-                                            ->body('Upload cover belakang jika ada, lalu klik "Scan OCR"')
+                                            ->body('Upload cover belakang jika ada')
                                             ->info()
                                             ->send();
                                     }),
@@ -87,25 +87,25 @@ class CreateBook extends CreateRecord
                                     ->afterStateUpdated(function ($state, Set $set) {
                                         Notification::make()
                                             ->title('Cover belakang diupload')
-                                            ->body('Klik "Scan OCR" untuk memproses kedua gambar')
+                                            ->body('Upload halaman copyright jika ada')
                                             ->info()
                                             ->send();
                                     }),
                                 
-                                    // Forms\Components\FileUpload::make('copyright')
-                                    // ->label('Copyright')
-                                    // ->image()
-                                    // ->directory('book-covers/copyright')
-                                    // ->maxSize(10240)
-                                    // ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])
-                                    // ->live()
-                                    // ->afterStateUpdated(function ($state, Set $set) {
-                                    //     Notification::make()
-                                    //         ->title('Copyright diupload')
-                                    //         ->body('Klik "Scan OCR" untuk memproses ketiga gambar')
-                                    //         ->info()
-                                    //         ->send();
-                                    // }),
+                                    Forms\Components\FileUpload::make('copyright')
+                                    ->label('Halaman Copyright')
+                                    ->image()
+                                    ->directory('book-covers/copyright')
+                                    ->maxSize(10240)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Set $set) {
+                                        Notification::make()
+                                            ->title('Halaman Copyright diupload')
+                                            ->body('Klik "Scan OCR" untuk memproses ketiga gambar')
+                                            ->info()
+                                            ->send();
+                                    }),
                                     
                             ]),
 
@@ -183,13 +183,16 @@ class CreateBook extends CreateRecord
 
                                 Forms\Components\TextInput::make('isbn')
                                     ->label('ISBN')
-                                    ->maxLength(255)
+                                    ->minLength(10)
+                                    ->maxLength(17)
                                     ->unique(ignoreRecord: true)
+                                    ->rule('regex:/^(97(8|9))?\d{9}(\d|X)$/')
                                     ->columnSpan(1),
 
                                 Forms\Components\TextInput::make('issn')
                                     ->label('ISSN')
-                                    ->maxLength(255)
+                                    ->minLength(10)
+                                    ->maxLength(17)
                                     ->unique(ignoreRecord: true)
                                     ->columnSpan(1),
 
@@ -207,7 +210,7 @@ class CreateBook extends CreateRecord
 
                         Forms\Components\Textarea::make('sinopsis')
                             ->label('Sinopsis')
-                            ->rows(3)
+                            ->rows(10)
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
@@ -230,6 +233,7 @@ class CreateBook extends CreateRecord
 
             $frontCover = $get('cover_depan');
             $backCover = $get('cover_belakang');
+            $copyrightPage = $get('copyright');
 
             // DEBUG: Log state
             Log::info('OCR Scan - File State', [
@@ -256,13 +260,16 @@ class CreateBook extends CreateRecord
             // Get file paths - FIXED: Handle Filament array format
             $frontPath = $this->extractFilePath($frontCover, 'front');
             $backPath = $backCover ? $this->extractFilePath($backCover, 'back') : null;
+            $copyrightPath = $copyrightPage ? $this->extractFilePath($copyrightPage, 'copyright') : null;
 
             // DEBUG: Log paths
             Log::info('OCR Scan - Extracted File Paths', [
                 'front_path' => $frontPath,
                 'back_path' => $backPath,
+                'copyright_path' => $copyrightPath,
                 'front_exists' => $frontPath && file_exists($frontPath),
                 'back_exists' => $backPath && file_exists($backPath),
+                'copyright_exists' => $copyrightPath && file_exists($copyrightPath),
             ]);
 
             if (!$frontPath || !file_exists($frontPath)) {
@@ -271,7 +278,8 @@ class CreateBook extends CreateRecord
 
             // Show processing notification
             $hasBackCover = ($backPath && file_exists($backPath));
-            
+            $hasCopyrightPage = ($copyrightPath && file_exists($copyrightPath));
+
             Notification::make()
                 ->title('Memproses OCR...')
                 ->body($hasBackCover ? 
@@ -477,7 +485,7 @@ class CreateBook extends CreateRecord
             
             // Handle year variations
             $tahun = $data['year'] ?? $data['publication_year'] ?? null;
-            if (is_numeric($tahun)) {
+            if (is_numeric($tahun) && $tahun >= 1800 && $tahun <= date('Y') ) {
                 $set('tahun_terbit', (int) $tahun);
             } else {
                 $set('tahun_terbit', null);
