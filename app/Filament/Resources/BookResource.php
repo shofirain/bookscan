@@ -33,13 +33,14 @@ class BookResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\ImageColumn::make('cover_depan')
                     ->label('Cover Depan')
                     ->circular()
                     ->size(60),
-                
-                    Tables\Columns\TextColumn::make('judul')
+
+                Tables\Columns\TextColumn::make('judul')
                     ->label('Judul')
                     ->sortable()
                     ->searchable()
@@ -53,13 +54,13 @@ class BookResource extends Resource
 
                         return null;
                     }),
-                
+
                 Tables\Columns\TextColumn::make('pengarang')
                     ->label('Pengarang')
                     ->sortable()
                     ->searchable()
                     ->limit(30),
-                
+
                 Tables\Columns\TextColumn::make('penerbit')
                     ->label('Penerbit')
                     ->sortable()

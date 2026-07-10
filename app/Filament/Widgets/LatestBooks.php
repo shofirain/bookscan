@@ -12,7 +12,7 @@ class LatestBooks extends BaseWidget
 {
     protected static ?string $heading = '📚 Buku Terbaru';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 3;
 
     protected int | string | array $columnSpan = 'full';
 
@@ -24,14 +24,14 @@ class LatestBooks extends BaseWidget
             ->query(
                 Book::with(['subject', 'collection', 'location'])
                     ->latest()
-                    ->limit(10) // Tambah jadi 10
+                    ->limit(5)
             )
             ->columns([
                 TextColumn::make('judul')
                     ->label('Judul')
                     ->searchable()
                     ->wrap()
-                    ->weight('bold'), // Tebalkan judul
+                    ->weight('bold'),
 
                 TextColumn::make('pengarang')
                     ->label('Pengarang')
@@ -56,7 +56,7 @@ class LatestBooks extends BaseWidget
                 TextColumn::make('tahun_terbit')
                     ->label('Tahun')
                     ->toggleable()
-                    ->badge() // Ubah jadi badge
+                    ->badge() 
                     ->color('success')
                     ->alignCenter(),
 
@@ -79,7 +79,6 @@ class LatestBooks extends BaseWidget
                     ->size('sm'),
             ])
             ->actions([
-                // Tambah aksi cepat untuk lihat detail
                 Tables\Actions\Action::make('detail')
                     ->label('Detail')
                     ->icon('heroicon-m-eye')

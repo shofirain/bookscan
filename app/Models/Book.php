@@ -35,7 +35,6 @@ class Book extends Model
 
     protected $casts = [
         'tahun_terbit' => 'integer',
-        'jumlah_halaman' => 'integer',
     ];
 
     public function collection(): BelongsTo

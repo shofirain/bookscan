@@ -23,7 +23,15 @@ class DatabaseSeeder extends Seeder
         // ]);
         
         $this->call([
-            AdminSeeder::class,
+            // AdminSeeder::class,
+            RoleSeeder::class,
         ]);
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            ['name' => 'Admin',
+            'password' => bcrypt('1234abcd'),
+        ]);
+        $admin->assignRole('admin');
     }
 }
